@@ -37,7 +37,24 @@ function createWindow () {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', createWindow)
+app.on('ready',function(){
+
+    var appWindow,infoWindow;
+    appWindow = new BrowserWindow({
+        show:false
+    });
+    appWindow.loadURL('http://www.google.com');
+
+    infoWindow = new BrowserWindow({
+        width:400,
+        height:300,
+        transparent:true,
+        frame:false
+    });
+
+    infoWindow.loadURL('http://www.google.com');
+
+});
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
