@@ -1,168 +1,156 @@
-var React = require('react');
 var $ = jQuery = require('jquery');
 var _ = require('lodash');
-var bootstrap = require('boostrap');
+var bootstrap = require('bootstrap');
 var fs = eRequire('fs');
-
 var loadMeetings = JSON.parse(fs.readFileSync(dataLocation));
+
 var electron = eRequire('electron');
-var ipc = electron.ipcRender;
+var ipc = electron.ipcRenderer;
+
+var React = require('react');
 var ReactDOM = require('react-dom');
 var MeetingList = require('./MeetingList');
 var Asidebar = require('./Asidebar');
 var HeaderNav = require('./HeaderNav');
 var AddMeeting = require('./AddMeeting');
 
-
 var App = React.createClass({
-//getInitialState
-    getInitialState:function(){
-        return {
-            meetingBodyVisible: false,
-              orderBy: 'meeting',
-              orderDir: 'asc',
-              queryText: '',
-              myMeeting: loadMeetings
+  getInitialState: function() {
+    return {
+      meetingBodyVisible: false,
+      orderBy: 'petName',
+      orderDir: 'asc',
+      queryText: '',
+      myMeetings: loadMeetings
+    }//return
+  }, //getInitialState
 
-        }
+  componentDidMount: function() {
+    ipc.on('addMeeting', function(event,message) {
+      this.toggleMeetingDisplay();
+    }.bind(this));
+  }, //componentDidMount
 
-    },
+  componentWillUnmount: function() {
+    ipc.removeListener('addMeeting', function(event,message) {
+      this.toggleMeetingDisplay();
+    }.bind(this));
+  }, //componentDidMount
 
-//toggleMeetingDislay
-    toggleMeetingDislay: function(){
-        var tempVisibility = !this.state.meetingBodyVisible;
-        this.setState({
-            meetingBodyVisible:tempVisibility
+  componentDidUpdate: function() {
+    fs.writeFile(dataLocation, JSON.stringify(this.state.myMeetings), 'utf8', function(err) {
+      if (err) {
+        console.log(err);
+      }
+    });//writeFile
+  }, //componentDidUpdate
 
+  toggleMeetingDisplay: function() {
+    var tempVisibility = !this.state.meetingBodyVisible;
+    this.setState({
+      meetingBodyVisible: tempVisibility
+    }); //setState
+  }, //toggleAptDisplay
 
-        });
+  showAbout:function() {
+    ipc.sendSync('openInfoWindow');
+  }, //showAbout
 
+  addItem: function(tempItem) {
+    var tempMeetings = this.state.myMeetings;
+    tempMeetings.push(tempItem);
+    this.setState({
+      myMeetins: tempMeetings,
+      meetingBodyVisible: false
+    }) //setState
+  }, //addItem
 
-    },
-    //showAbout
+  deleteMessage: function(item) {
+    var allMeetings = this.state.myMeetings;
+    var newMeetings= _.without(allMeetings, item);
+    this.setState({
+      myMeetings: newMeetings
+    }); //setState
+  }, //deleteMessage
 
-    showAbout: function(){
-        ipc.sendSync('openInfoWindow');
+  reOrder: function(orderBy, orderDir) {
+    this.setState({
+      orderBy: orderBy,
+      orderDir: orderDir
+    }) //setState
+  }, //reOrder
 
+  searchApts: function(query) {
+    this.setState({
+      queryText: query
+    }); //setState
+  }, //searchApts
 
-    },
-    //addItem
-    addItem: function(tempItem){
-        var tempMeetings = this.state.myMeeting;
-        tempMeetings.push(tempItem);
-        this.setState({
-            myMeetings:tempMeetings,
-            meetingBodyVisible:false
-        })
+  render: function() {
+    var filteredMeetings = [];
+    var queryText = this.state.queryText;
+    var orderBy = this.state.orderBy;
+    var orderDir = this.state.orderDir;
+    var myMeetings = this.state.myMeetings;
 
+    if(this.state.meetingBodyVisible === true) {
+      $('#addMeeting').modal('show');
+    } else {
+      $('#addMeeting').modal('hide');
+    }
 
-
-    },
-
-    //deleteMessage
-    deleteMessage: function(item){
-        var allMeetings = this.state.myMeetings;
-        //lodash to delete
-        var newMeetings = _.without(allMeetings, item);
-        this.setState({
-
-            myMeetings:newMeetings
-        });
-
-    },
-    //search meeting
-    searchMeetings: function(query){
-        this.setState({
-            queryText:query
-        });
-
-    },
-
-    //reOrder
-    reOrder: function(orderBy, orderDir){
-        this.setState({
-            orderBy:orderBy,
-            orderDir:orderDir
-        })
-
-
-
-    },
-
-    //render
-    render:function(){
-        //return
-
-            var filteredMeetings = [];
-            var queryText = this.state.queryText;
-            var orderBy = this.state.orderBy;
-            var orderDir = this.state.orderDir;
-            var myMeetings = this.state.myMeetings;
-
-        //check meetingBodyVisible
-            if(this.state.meetingBodyVisible){
-            $('#addMeeting').modal('show');
-        }
-        else{
-            $('#addMeeting').modal('hide');
-
-        }
-
-        for(var i=0;i<myMeetings.length;i++){
-            if( (myMeetings[i].meeting.toLowerCase().indexOf(queryText)!=-1) ||
+    for (var i = 0; i < myMeetings.length; i++) {
+      if (
+        (myMeetings[i].meeting.toLowerCase().indexOf(queryText)!=-1) ||
         (myMeetings[i].customer.toLowerCase().indexOf(queryText)!=-1) ||
         (myMeetings[i].date.toLowerCase().indexOf(queryText)!=-1) ||
-        (myMeetings[i].meetingNote.toLowerCase().indexOf(queryText)!=-1)){
-                filteredMeetings.push(myMeetings[i]);
-            }
-        }
+        (myMeetings[i].meetingNote.toLowerCase().indexOf(queryText)!=-1)
+      ) {
+        filteredMeetings.push(myMeetings[i]);
+      }
+    }
 
-        filteredMeetings = _.orderBy(filteredMeetings,function(item){
-            return item[orderBy].toLowerCase();
-        },orderDir);//order array
+    filteredMeetings = _.orderBy(filteredMeetings, function(item) {
+      return item[orderBy].toLowerCase();
+    }, orderDir); // order array
 
-        filteredMeetings = filteredMeetings.map(function(item, index){
-            return
-                <MeetingList
-                key={index}
-                singleItem={item}
-                whichItem={item}
-                onDelete={this.deleteMessage}
+    filteredMeetings=filteredMeetings.map(function(item, index) {
+      return(
+        <MeetingList key = {index}
+          singleItem = {item}
+          whichItem =  {item}
+          onDelete = {this.deleteMessage}
+        />
+      ) // return
+    }.bind(this)); //Appointments.map
 
-                />
-
-
-
-        }.bind(this));//bind
-
-        return (
-            <div className="application">
-                <HeaderNav
-                  orderBy = {this.state.orderBy}
-                  orderDir =  {this.state.orderDir}
-                  onReOrder = {this.reOrder}
-                  onSearch= {this.searchMeetings}
-                />
-            <div className="interface">
-                  <AsideBar
-                handleToggle = {this.toggleMeetingDisplay}
-                handleAbout = {this.showAbout}
-                  />
-                  <AddMeeting
-                handleToggle = {this.toggleMeetingDisplay}
-                addMeeting = {this.addItem}
-                  />
-              <div className="container">
-               <div className="row">
+    return(
+      <div className="application">
+        <HeaderNav
+          orderBy = {this.state.orderBy}
+          orderDir =  {this.state.orderDir}
+          onReOrder = {this.reOrder}
+          onSearch= {this.searchMeetings}
+        />
+        <div className="interface">
+          <AsideBar
+            handleToggle = {this.toggleMeetingDisplay}
+            handleAbout = {this.showAbout}
+          />
+          <AddMeeting
+            handleToggle = {this.toggleMeetingDisplay}
+            addMeeting = {this.addItem}
+          />
+          <div className="container">
+           <div className="row">
              <div className="meetings col-sm-12">
                <h2 className="meetings-headline">Current Meetings</h2>
                <ul className="item-list media-list">{filteredMeetings}</ul>
-             </div>
-           </div>
-          </div>
-        </div>
+             </div>{/* col-sm-12 */}
+           </div>{/* row */}
+          </div>{/* container */}
+        </div>{/* interface */}
       </div>
-
     );
   } //render
 });//MainInterface
