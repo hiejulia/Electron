@@ -7,7 +7,7 @@ var src = './src';
 var app = './app';
 //task
 gulp.task('js',function(){
-    return gulp.src(src +'/js/bundle.js')
+    return gulp.src(src +'/js/render.js')
         .pipe(browserify({
 
             transform:'reactify',
@@ -50,7 +50,7 @@ gulp.task('html',function(){
 });
 //serve
 gulp.task('serve',['html','js','css'],function(){
-    run('electron main.js').exec();
+    run('electron app/main.js').exec();
 
 
 
