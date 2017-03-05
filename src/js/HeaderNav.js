@@ -42,12 +42,6 @@ var HeaderNav = React.createClass({
       </nav>
 
 
-
-
-
-
-
-
         )
 
 
