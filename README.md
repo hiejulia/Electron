@@ -1,3 +1,28 @@
+## Electron CRUD app
+
+## Tech used:
++ Electron
++ ReactJS
++ D3.js
++ Bootstrap
++ Material design
+
+
+## How to install
++ Clone this repo `git clone <this-app>` or download as zip file
++ Run `npm install` 
++ Make sure you install `gulp` as globally
++ Run `npm start`
+
+
+
+
+
+
+
+
+
+
 # electron-quick-start
 
 **Clone and run for a quick way to see Electron in action.**

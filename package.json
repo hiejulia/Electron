@@ -4,7 +4,8 @@
   "description": "A minimal Electron application",
   "main": "app/main.js",
   "scripts": {
-    "pack":"electron-packager . 'Meeting Addie' --out ~/Desktop/MeetingAddie --overwrite --icon ./icon/icon"
+    "pack":"electron-packager . 'Meeting Addie' --out ~/Desktop/MeetingAddie --overwrite --icon ./icon/icon",
+    "start":"gulp"
   },
   "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [
