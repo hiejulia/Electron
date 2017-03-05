@@ -1,5 +1,4 @@
-var React = import('react');
-
+var React = require('react');
 
 var HeaderNav = React.createClass({
     //handleSort
@@ -8,7 +7,7 @@ var HeaderNav = React.createClass({
     },
     //handleOrder
     handleOrder: function(event){
-        this.props.onReOrder: function(this.props.orderBy,e.target.id);
+        this.props.onReOrder(this.props.orderBy,event.target.id);
 
     },
     //handleSearch

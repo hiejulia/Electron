@@ -16,7 +16,7 @@ function toggleWindow(whichWindow) {
 app.on('ready', function() {
   var appWindow, infoWindow;
   appWindow = new BrowserWindow({
-    show: false
+    show: true
   }); //appWindow
 
   appWindow.loadURL('file://' + __dirname + '/index.html');
@@ -26,7 +26,7 @@ app.on('ready', function() {
     height: 300,
     transparent: true,
     show: false,
-    frame: false
+    frame: true
   }); //infoWindow
 
   infoWindow.loadURL('file://' + __dirname + '/info.html');
@@ -57,7 +57,7 @@ app.on('ready', function() {
           label: 'Add Meeting',
           accelerator: process.platform === 'darwin' ? 'Command+N':'Ctrl+N',
           click(item,focusedWindow) {
-            if (focusedWindow) focusedWindow.webContents.send('addAppointment');
+            if (focusedWindow) focusedWindow.webContents.send('addMeeting');
           }
         },{
           role: 'help',
